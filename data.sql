@@ -1,4 +1,10 @@
 -- Katie's script for creating the McDonald's database schema
+-- Insertion order (based on foreign key dependencies):
+-- Address, MenuItem
+-- Person, Franchise
+-- Customer, Employee, FoodStock, Order
+-- OrderItem, CustomerOrder
+
 CREATE TABLE Address(
     Id INTEGER PRIMARY KEY,
     Street VARCHAR(255) NOT NULL,
@@ -47,27 +53,10 @@ CREATE TABLE Orders(
     FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id)
 );
 
-CREATE TABLE CustomerOrder(
-    CustomerId INTEGER,
-    OrderId INTEGER,
-    PRIMARY KEY(CustomerId, OrderId),
-    FOREIGN KEY(CustomerId) REFERENCES Customer(PersonId),
-    FOREIGN KEY(OrderId) REFERENCES Orders(Id)
-);
-
 CREATE TABLE MenuItem(
     Id INTEGER PRIMARY KEY,
     Name VARCHAR(255) UNIQUE NOT NULL,
     Price DECIMAL(8, 2) NOT NULL
-);
-
-CREATE TABLE OrderItem(
-    Id INTEGER PRIMARY KEY,
-    OrderId INTEGER,
-    MenuItemId INTEGER,
-    Quantity INTEGER NOT NULL,
-    FOREIGN KEY(OrderId) REFERENCES Orders(Id),
-    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)
 );
 
 CREATE TABLE FoodStock(
@@ -78,13 +67,6 @@ CREATE TABLE FoodStock(
     FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),
     FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)
 );
-
--- Insertion order
--- Address, MenuItem
--- Person, Franchise
--- Customer, Employee, FoodStock, Order
--- OrderItem, CustomerOrder
-
 
 CREATE TABLE CustomerOrder(
     CustomerId INTEGER,

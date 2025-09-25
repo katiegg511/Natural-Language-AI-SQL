@@ -16,8 +16,8 @@ setupSqlPath = getPath("setup.sql")
 setupSqlDataPath = getPath("setupData.sql")
 
 # kt paths
-# setupSqlPath = getPath("data.sql")
-# setupSqlDataPath = getPath("putIndata.sql")
+setupSqlPath = getPath("data.sql")
+setupSqlDataPath = getPath("putIndata.sql")
 
 
 
@@ -78,7 +78,8 @@ strategies = {
 }
 
 questions = [
-    "Which are the most awarded dogs?",
+    "What is the most ordered menu item?",
+    #"Which are the most awarded dogs?",
     # "Which dogs have multiple owners?",
     # "Which people have multiple dogs?",
     # "What are the top 3 cities represented?",
