@@ -20,7 +20,6 @@ setupSqlPath = getPath("data.sql")
 setupSqlDataPath = getPath("putIndata.sql")
 
 
-
 # Erase previous db
 if os.path.exists(sqliteDbPath):
     os.remove(sqliteDbPath)
@@ -66,6 +65,15 @@ def getChatGptResponse(content):
     result = "".join(responseList)
     return result
 
+single_domain_examples = [
+    "how many employees work at the franchise with id = 1?\nselect count(*) from Employee where FranchiseID = 1;",
+    "how many items were ordered in Orders where Id is 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
+    "how many big macs does franchise with id = 2 have in stock?\nselect * from FoodStock join MenuItem on FoodStock.MenuItemId = Menuitem.Id join Franchise on FoodStock.FranchiseId = Franchise.Id where FoodStock.FranchiseId = 2 and MenuItem.Name = 'Big Mac';",
+]
+
+cross_domain_examples = [
+    "who doesn't have a way for us to text them?\nselect p.person_id, p.name\nfrom person p\nleft join phone ph on p.person_id = ph.person_id and ph.can_recieve_sms = 1\nwhere ph.phone_id is null;\n"
+]
 
 # strategies
 commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not explain it!"
@@ -89,6 +97,8 @@ questions = [
     "Will we have a problem texting any of the previous award winners?"
     # "I need insert sql into my tables can you provide good unique data?"
 ]
+
+
 
 def sanitizeForJustSql(value):
     gptStartSqlMarker = "```sql"
