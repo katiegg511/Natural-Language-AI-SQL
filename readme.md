@@ -10,9 +10,9 @@
 
 **description** This database represents the mock data to manage an upcoming dogshow.
 
-<a href="sample_post.md">**sample_post.md**</a> is a sample report of the data in this effort.
+<a href="dog_show_content/sample_post.md">**sample_post.md**</a> is a sample report of the data in this effort.
 
-<a href="schema.png">schema.png</a> is a sample schema. Can you identify where foreign keys should exist but are not explicitly defined 😊? This was created from the sqlite database via <a href="https://www.google.com/search?q=install+schemacrawler">schemacrawler</a>:
+<a href="dog_show_content/schema.png">schema.png</a> is a sample schema. Can you identify where foreign keys should exist but are not explicitly defined 😊? This was created from the sqlite database via <a href="https://www.google.com/search?q=install+schemacrawler">schemacrawler</a>:
 ```
 schemacrawler --server sqlite --database .\aidb.sqlite --command=schema --output-file=./schema.png --info-level=standard
 ```
