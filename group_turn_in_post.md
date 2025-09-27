@@ -81,14 +81,24 @@ LIMIT 1;  ```
 ## File of Other Examples
 
 1.  one_shot
-    "how many employees work at the franchise with id = 1"
-    "\nSELECT COUNT(\*) FROM Employee WHERE FranchiseId = 1;\n"
-    "[(3,)]"
+Question
+how many employees work at the franchise with id = 1?
+
+SQL Syntax Response: 
+SELECT COUNT(\*) FROM Employee WHERE FranchiseId = 1;
+
+Query Raw Response:
+[(3,)]
 
 2.  zero_shot
-    "what menuItems were ordered in order 3?"
-    "\nSELECT MenuItem.Name \nFROM OrderItem \nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id \nWHERE OrderItem.OrderId = 3;\n"
-    "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
+Question:
+what menuItems were ordered in order 3?
+
+SQL Syntax Response: 
+SELECT MenuItem.Name \nFROM OrderItem \nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id \nWHERE OrderItem.OrderId = 3;
+
+Query Raw Response:
+[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]
 
 3. zero_shot
 Question:
@@ -159,8 +169,4 @@ Disney.
 <!-- Describe somewhere which prompting strategies you tried and if you noticed a difference between them. (Note my post only does two of three - which is fine!).  -->
 
 ## Conclusion
-
-We tried a meeting strategy, meaning we told chat there was an urgent meeting, in order to see if the urgency did anything. We then did that with zero_shot and one_shot. Chat was able to get all of them correct, with no discernable differences.
-While the answers were correct, there were queries that got to the same answer but different ways. For example, to get the number of employees one used the NumEmployee column and another used the EmployeeId foreign key.
-
-We also made a strategy to try and confuse it by having it be completely unrelated to SQL: "who made this chicken??? Was it you?" as a pre-prompt with zero_shot, and it still got everything right.
+We tried a meeting strategy, meaning we told chat there was an urgent meeting, in order to see if the urgency did anything. We then did that with zero_shot and one_shot. Chat was able to get most of them correct, except for one where it only provided part of the information requested. Even among the correct answers, there were queries that got to the same answer but different ways. For example, to get the number of employees one used the NumEmployee column and another used the EmployeeId foreign key. We also found that a common mistake is for the friendly response to give the franchises a name, with names like 'Pokemon' and 'Disney'. Overall, AI did a good job without a significance difference between zero-shot vs one-shot or single-domain vs cross-domain. We even tried a prompting strategy to try and confuse it by be completely off topic, "who made this chicken??? Was it you?", as a pre-prompt with zero_shot, and it didn't appear to affect the responses.

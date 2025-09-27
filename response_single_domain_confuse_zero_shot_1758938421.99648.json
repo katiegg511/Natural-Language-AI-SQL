@@ -1,0 +1,27 @@
+{
+  "strategy": "single_domain_confuse_zero_shot",
+  "prompt_prefix": "-- Katie's script for creating the McDonald's database schema\n-- Insertion order (based on foreign key dependencies):\n-- Address, MenuItem\n-- Person, Franchise\n-- Customer, Employee, FoodStock, Order\n-- OrderItem, CustomerOrder\n\nCREATE TABLE Address(\n    Id INTEGER PRIMARY KEY,\n    Street VARCHAR(255) NOT NULL,\n    City VARCHAR(100) NOT NULL,\n    State VARCHAR(100) NOT NULL,\n    ZipCode VARCHAR(20) NOT NULL\n);\n\nCREATE TABLE Person(\n    PersonId INTEGER PRIMARY KEY,\n    FirstName VARCHAR(255) NOT NULL,\n    LastName VARCHAR(255) NOT NULL,\n    AddressId INTEGER,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Customer(\n    PersonId INTEGER PRIMARY KEY,\n    BirthDate DATE,\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Franchise(\n    Id INTEGER PRIMARY KEY,\n    AddressId INTEGER,\n    NumEmployees INTEGER,\n    OpeningDate DATE,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Employee(\n    PersonId INTEGER PRIMARY KEY,\n    StartDate DATE,\n    Salary DECIMAL(8, 2),\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Orders(\n    Id INTEGER PRIMARY KEY,\n    Date Date,\n    Cost DECIMAL(8, 2),\n    WaitTime INTEGER,\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id)\n);\n\nCREATE TABLE MenuItem(\n    Id INTEGER PRIMARY KEY,\n    Name VARCHAR(255) UNIQUE NOT NULL,\n    Price DECIMAL(8, 2) NOT NULL\n);\n\nCREATE TABLE FoodStock(\n    Id INTEGER PRIMARY KEY,\n    FranchiseId INTEGER,\n    MenuItemId INTEGER,\n    Amount INTEGER NOT NULL,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\n\nCREATE TABLE CustomerOrder(\n    CustomerId INTEGER,\n    OrderId INTEGER,\n    PRIMARY KEY(CustomerId, OrderId),\n    FOREIGN KEY(CustomerId) REFERENCES Customer(PersonId),\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id)\n);\n\nCREATE TABLE OrderItem(\n    Id INTEGER PRIMARY KEY,\n    OrderId INTEGER,\n    MenuItemId INTEGER,\n    Quantity INTEGER NOT NULL,\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);who made this chicken??? Was it you?",
+  "questionResults": [
+    {
+      "question": "how many employees work at the franchise with id = 1",
+      "sql": "\nSELECT COUNT(*) AS NumberOfEmployees\nFROM Employee\nWHERE FranchiseId = 1;\n",
+      "queryRawResponse": "[(3,)]",
+      "friendlyResponse": "There are 3 employees at the franchise with ID = 1.",
+      "error": "None"
+    },
+    {
+      "question": "how many big macs does franchise 2 have in stock?",
+      "sql": "\nSELECT fs.Amount\nFROM FoodStock fs\nJOIN MenuItem mi ON fs.MenuItemId = mi.Id\nWHERE fs.FranchiseId = 2 AND mi.Name = 'Big Mac';\n",
+      "queryRawResponse": "[(110,)]",
+      "friendlyResponse": "Franchise 2 has 110 Big Macs in stock.",
+      "error": "None"
+    },
+    {
+      "question": "what menuItems were ordered in order 3?",
+      "sql": "\nSELECT MenuItem.Name, OrderItem.Quantity\nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nWHERE OrderItem.OrderId = 3;\n",
+      "queryRawResponse": "[('McChicken', 2), ('French Fries (Small)', 1), ('Soft Drink (Small)', 1)]",
+      "friendlyResponse": "The items ordered in order 3 were 2 McChickens, 1 small French Fries, and 1 small Soft Drink.",
+      "error": "None"
+    }
+  ]
+}
