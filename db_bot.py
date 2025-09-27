@@ -12,16 +12,16 @@ def getPath(fname):
 
 # SQLITE
 sqliteDbPath = getPath("aidb.sqlite")
-setupSqlPath = getPath("setup.sql")
-setupSqlDataPath = getPath("setupData.sql")
+setupSqlPath = getPath("dog_show_content/setup.sql")
+setupSqlDataPath = getPath("dog_show_content/setupData.sql")
 
 # kt paths
-setupSqlPath = getPath("data.sql")
-setupSqlDataPath = getPath("putIndata.sql")
+setupSqlPath = getPath("mcdonald_database/data.sql")
+setupSqlDataPath = getPath("mcdonald_database/putIndata.sql")
 
 # cross_domain paths
-setupCrossDomainSqlPath = getPath("schema_theater.sql")
-setupCrossDomainSqlDataPath = getPath("seed_theater.sql")
+setupCrossDomainSqlPath = getPath("cross_domain_theater_database/schema_theater.sql")
+setupCrossDomainSqlDataPath = getPath("cross_domain_theater_database/seed_theater.sql")
 
 # Erase previous db
 if os.path.exists(sqliteDbPath):
@@ -46,8 +46,8 @@ with (
 sqliteCursor.executescript(setupSqlScript) # setup tables and keys
 sqliteCursor.executescript(setupSQlDataScript) # setup tables and keys
 
-sqliteCursor.executescript(setupCrossDomainSqlScript) # setup CrossDomain tables and keys
-sqliteCursor.executescript(setupCrossDomainSQlDataScript) # setup CrossDomain tables and keys
+sqliteCursor.executescript(setupCrossDomainSqlScript)
+sqliteCursor.executescript(setupCrossDomainSQlDataScript)
 
 def runSql(query):
     result = sqliteCursor.execute(query).fetchall()
