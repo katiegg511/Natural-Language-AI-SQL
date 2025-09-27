@@ -33,8 +33,10 @@ Our database is designed to help McDonald's keep track of all the information re
 <!-- Sample question, SQL query, response that did not work (if you have one)  -->
 
 ## Question that it tripped up on
-The SQL response was the correct way to answer the question, but then the friendly response invented a name for the franchise.
 
+### First Question
+
+**Strategy**: Cross Domain One Shot Meeting
 
 **Question**: Which franchise has the highest total revenue?
 
@@ -46,7 +48,17 @@ GROUP BY f.Id
 ORDER BY TotalRevenue DESC  
 LIMIT 1;  ```
 
+**SQL Result**: "[(1, 90.1)]"
+
 **Friendly Response**: The franchise with the highest total revenue is Pokémon.
+
+**Explanation**: The SQL response was the correct way to answer the question, but then the friendly response invented a name for the franchise.
+
+**Correct SQL Result**: "[(1, 90.1)]"
+
+**Correct Friendly Result**: The franchise with the highest total revenue is franchise 1.
+
+### Second Question
 
 **Strategy**: Zeroshot Meeting
 
