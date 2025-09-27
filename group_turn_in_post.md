@@ -32,12 +32,19 @@ response: "[(110,)]"
 <!-- Sample question, SQL query, response that did not work (if you have one)  -->
 
 ## Question that it tripped up on
+The SQL response was the correct way to answer the question, but then the friendly response invented a name for the franchise.
 
-**Question**:
+**Question**: Which franchise has the highest total revenue?
 
-**GPT SQL Response**:
+**GPT SQL Response**: ```
+SELECT f.Id, SUM(o.Cost) AS TotalRevenue  
+FROM Franchise f  
+JOIN Orders o ON f.Id = o.FranchiseId  
+GROUP BY f.Id  
+ORDER BY TotalRevenue DESC  
+LIMIT 1;  ```
 
-**Friendly Response**:
+**Friendly Response**: The franchise with the highest total revenue is Pokémon.
 
 <!-- A file outlining at least 6 other examples.  -->
 
@@ -53,9 +60,44 @@ response: "[(110,)]"
     "\nSELECT MenuItem.Name \nFROM OrderItem \nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id \nWHERE OrderItem.OrderId = 3;\n"
     "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
 
-3.
+3. zero_shot
+Question:
+What is the most ordered menu item?
 
-4.
+SQL Syntax Response:
+SELECT MenuItem.Name
+FROM MenuItem
+JOIN OrderItem ON MenuItem.Id = OrderItem.MenuItemId
+GROUP BY MenuItem.Id
+ORDER BY SUM(OrderItem.Quantity) DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Big Mac',)]
+Friendly Response:
+The most ordered menu item is the Big Mac.
+
+4. zero_shot
+Question:
+What is the average wait time for each franchise, from longest to shortest?
+SQL Syntax Response:
+
+SELECT FranchiseId, AVG(WaitTime) AS AverageWaitTime
+FROM Orders
+GROUP BY FranchiseId
+ORDER BY AverageWaitTime DESC;
+
+Query Raw Response:
+[(1, 20.333333333333332), (4, 18.666666666666668), (3, 18.333333333333332), (6, 18.0), (5, 16.0), (2, 15.666666666666666)]
+Friendly Response:
+Certainly! Here is the average wait time for each franchise from longest to shortest:
+
+1. Franchise 1: 20.33 minutes
+2. Franchise 4: 18.67 minutes
+3. Franchise 3: 18.33 minutes
+4. Franchise 6: 18.0 minutes
+5. Franchise 5: 16.0 minutes
+6. Franchise 2: 15.67 minutes
 
 5.
 
