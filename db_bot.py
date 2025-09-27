@@ -110,10 +110,10 @@ strategies = {
     "one_shot_sad": setupSqlScript + sadRequest + single_domain_examples[0],
     "one_shot_confuse": setupSqlScript + confuseItPrompt + single_domain_examples[0],
     
-    "double_shot_common": setupSqlScript + commonSqlOnlyRequest + single_domain_examples[5] + single_domain_examples[0],
-    "double_shot_meeting": setupSqlScript + importantMeetingRequest + single_domain_examples[5] + single_domain_examples[0],
-    "double_shot_sad": setupSqlScript + sadRequest + single_domain_examples[5] + single_domain_examples[0],
-    "double_shot_confuse": setupSqlScript + confuseItPrompt + single_domain_examples[5] + single_domain_examples[0],
+    "double_shot_common": setupSqlScript + commonSqlOnlyRequest + single_domain_examples[4] + single_domain_examples[0],
+    "double_shot_meeting": setupSqlScript + importantMeetingRequest + single_domain_examples[4] + single_domain_examples[0],
+    "double_shot_sad": setupSqlScript + sadRequest + single_domain_examples[4] + single_domain_examples[0],
+    "double_shot_confuse": setupSqlScript + confuseItPrompt + single_domain_examples[4] + single_domain_examples[0],
 
     # cross domain strategies
     "cross_domain_one_shot_common": ("Our Database: " + setupSqlScript + 
