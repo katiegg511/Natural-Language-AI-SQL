@@ -1,0 +1,69 @@
+{
+  "strategy": "one_shot_confuse",
+  "prompt_prefix": "-- Katie's script for creating the McDonald's database schema\n-- Insertion order (based on foreign key dependencies):\n-- Address, MenuItem\n-- Person, Franchise\n-- Customer, Employee, FoodStock, Order\n-- OrderItem, CustomerOrder\n\nCREATE TABLE Address(\n    Id INTEGER PRIMARY KEY,\n    Street VARCHAR(255) NOT NULL,\n    City VARCHAR(100) NOT NULL,\n    State VARCHAR(100) NOT NULL,\n    ZipCode VARCHAR(20) NOT NULL\n);\n\nCREATE TABLE Person(\n    PersonId INTEGER PRIMARY KEY,\n    FirstName VARCHAR(255) NOT NULL,\n    LastName VARCHAR(255) NOT NULL,\n    AddressId INTEGER,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Customer(\n    PersonId INTEGER PRIMARY KEY,\n    BirthDate DATE,\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Franchise(\n    Id INTEGER PRIMARY KEY,\n    AddressId INTEGER,\n    NumEmployees INTEGER,\n    OpeningDate DATE,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Employee(\n    PersonId INTEGER PRIMARY KEY,\n    StartDate DATE,\n    Salary DECIMAL(8, 2),\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Orders(\n    Id INTEGER PRIMARY KEY,\n    Date Date,\n    Cost DECIMAL(8, 2),\n    WaitTime INTEGER,\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id)\n);\n\nCREATE TABLE MenuItem(\n    Id INTEGER PRIMARY KEY,\n    Name VARCHAR(255) UNIQUE NOT NULL,\n    Price DECIMAL(8, 2) NOT NULL\n);\n\nCREATE TABLE FoodStock(\n    Id INTEGER PRIMARY KEY,\n    FranchiseId INTEGER,\n    MenuItemId INTEGER,\n    Amount INTEGER NOT NULL,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\n\nCREATE TABLE CustomerOrder(\n    CustomerId INTEGER,\n    OrderId INTEGER,\n    PRIMARY KEY(CustomerId, OrderId),\n    FOREIGN KEY(CustomerId) REFERENCES Customer(PersonId),\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id)\n);\n\nCREATE TABLE OrderItem(\n    Id INTEGER PRIMARY KEY,\n    OrderId INTEGER,\n    MenuItemId INTEGER,\n    Quantity INTEGER NOT NULL,\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\nwho made this chicken??? Was it you?\nExample: How many items were ordered in order 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
+  "questionResults": [
+    {
+      "question": "What is the most ordered menu item?",
+      "sql": "\nSELECT MenuItem.Name, SUM(OrderItem.Quantity) AS TotalQuantity\nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nGROUP BY MenuItem.Id, MenuItem.Name\nORDER BY TotalQuantity DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "None"
+    },
+    {
+      "question": "Who doesn't have a way for us to text them?",
+      "sql": "\nSELECT SUM(Quantity) FROM OrderItem WHERE OrderId = 3;\n",
+      "queryRawResponse": "[(4,)]",
+      "friendlyResponse": "I'm sorry, but I can't provide an answer based on \"(4,).\" Could you please clarify or provide more context?",
+      "error": "None"
+    },
+    {
+      "question": "Will we have a problem texting any of the previous award winners?",
+      "sql": "\n   SELECT SUM(Quantity) AS TotalItemsOrdered\n   FROM OrderItem\n   WHERE OrderId = 3;\n   ",
+      "queryRawResponse": "[(4,)]",
+      "friendlyResponse": "No, you won't have a problem.",
+      "error": "None"
+    },
+    {
+      "question": "On which date did we earn the most revenue?",
+      "sql": "\nSELECT SUM(Quantity) AS TotalItemsOrdered\nFROM OrderItem\nWHERE OrderId = 3;\n",
+      "queryRawResponse": "[(4,)]",
+      "friendlyResponse": "The highest revenue was earned on the 4th.",
+      "error": "None"
+    },
+    {
+      "question": "Which franchise has the highest total revenue?",
+      "sql": "\n   SELECT SUM(Quantity) AS TotalItems\n   FROM OrderItem\n   WHERE OrderId = 3;\n   ",
+      "queryRawResponse": "[(4,)]",
+      "friendlyResponse": "As of recent reports, the Pok\u00e9mon franchise is often recognized as having the highest total revenue among entertainment franchises.",
+      "error": "None"
+    },
+    {
+      "question": "What is the average wait time for each franchise, from longest to shortest?",
+      "sql": "\n   SELECT SUM(OrderItem.Quantity) AS TotalItems\n   FROM Orders\n   JOIN OrderItem ON Orders.Id = OrderItem.OrderId\n   WHERE OrderItem.OrderId = 3;\n   ",
+      "queryRawResponse": "[(4,)]",
+      "friendlyResponse": "The average wait time for each franchise is 4 units, with the order being from longest to shortest.",
+      "error": "None"
+    },
+    {
+      "question": "how many employees work at the franchise with id = 1",
+      "sql": "\nSELECT COUNT(*) AS NumberOfEmployees\nFROM Employee\nWHERE FranchiseId = 1;\n",
+      "queryRawResponse": "[(3,)]",
+      "friendlyResponse": "There are 3 employees working at the franchise with ID = 1.",
+      "error": "None"
+    },
+    {
+      "question": "how many big macs does franchise 2 have in stock?",
+      "sql": "\nSELECT fs.Amount\nFROM FoodStock fs\nJOIN MenuItem mi ON fs.MenuItemId = mi.Id\nWHERE mi.Name = 'Big Mac' AND fs.FranchiseId = 2;\n",
+      "queryRawResponse": "[(110,)]",
+      "friendlyResponse": "Franchise 2 has 110 Big Macs in stock.",
+      "error": "None"
+    },
+    {
+      "question": "what menuItems were ordered in order 3?",
+      "sql": "\nSELECT MenuItem.Name \nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nWHERE OrderItem.OrderId = 3;\n",
+      "queryRawResponse": "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]",
+      "friendlyResponse": "Order 3 included a McChicken, small French fries, and a small soft drink.",
+      "error": "None"
+    }
+  ]
+}

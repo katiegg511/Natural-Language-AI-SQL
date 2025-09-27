@@ -1,0 +1,69 @@
+{
+  "strategy": "cross_domain_one_shot_sad",
+  "prompt_prefix": "Our Database: -- Katie's script for creating the McDonald's database schema\n-- Insertion order (based on foreign key dependencies):\n-- Address, MenuItem\n-- Person, Franchise\n-- Customer, Employee, FoodStock, Order\n-- OrderItem, CustomerOrder\n\nCREATE TABLE Address(\n    Id INTEGER PRIMARY KEY,\n    Street VARCHAR(255) NOT NULL,\n    City VARCHAR(100) NOT NULL,\n    State VARCHAR(100) NOT NULL,\n    ZipCode VARCHAR(20) NOT NULL\n);\n\nCREATE TABLE Person(\n    PersonId INTEGER PRIMARY KEY,\n    FirstName VARCHAR(255) NOT NULL,\n    LastName VARCHAR(255) NOT NULL,\n    AddressId INTEGER,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Customer(\n    PersonId INTEGER PRIMARY KEY,\n    BirthDate DATE,\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Franchise(\n    Id INTEGER PRIMARY KEY,\n    AddressId INTEGER,\n    NumEmployees INTEGER,\n    OpeningDate DATE,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Employee(\n    PersonId INTEGER PRIMARY KEY,\n    StartDate DATE,\n    Salary DECIMAL(8, 2),\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Orders(\n    Id INTEGER PRIMARY KEY,\n    Date Date,\n    Cost DECIMAL(8, 2),\n    WaitTime INTEGER,\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id)\n);\n\nCREATE TABLE MenuItem(\n    Id INTEGER PRIMARY KEY,\n    Name VARCHAR(255) UNIQUE NOT NULL,\n    Price DECIMAL(8, 2) NOT NULL\n);\n\nCREATE TABLE FoodStock(\n    Id INTEGER PRIMARY KEY,\n    FranchiseId INTEGER,\n    MenuItemId INTEGER,\n    Amount INTEGER NOT NULL,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\n\nCREATE TABLE CustomerOrder(\n    CustomerId INTEGER,\n    OrderId INTEGER,\n    PRIMARY KEY(CustomerId, OrderId),\n    FOREIGN KEY(CustomerId) REFERENCES Customer(PersonId),\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id)\n);\n\nCREATE TABLE OrderItem(\n    Id INTEGER PRIMARY KEY,\n    OrderId INTEGER,\n    MenuItemId INTEGER,\n    Quantity INTEGER NOT NULL,\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\nExample From Another Database:\nPRAGMA foreign_keys = ON;\n\nCREATE TABLE Theater_Addresses (\n  address_id   INTEGER PRIMARY KEY,\n  street       TEXT NOT NULL,\n  city         TEXT NOT NULL,\n  state        TEXT NOT NULL,\n  zip          TEXT NOT NULL\n);\n\nCREATE INDEX ix_address_composite ON Theater_Addresses(street, city, state, zip);\n\nCREATE TABLE Theater_Person (\n  person_id    INTEGER PRIMARY KEY,\n  address_id   INTEGER,\n  first_name   TEXT NOT NULL,\n  last_name    TEXT NOT NULL,\n  phone_number TEXT,\n  email        TEXT,\n  UNIQUE (email),\n  FOREIGN KEY (address_id) REFERENCES Theater_Addresses(address_id)\n    ON UPDATE CASCADE ON DELETE SET NULL\n);\n\nCREATE TABLE Theater_Customer (\n  customer_id  INTEGER PRIMARY KEY,\n  birthdate    TEXT,\n  FOREIGN KEY (customer_id) REFERENCES Theater_Person(person_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE TABLE Theater_Employee (\n  employee_id  INTEGER PRIMARY KEY,\n  salary       REAL NOT NULL,\n  position     TEXT NOT NULL,\n  FOREIGN KEY (employee_id) REFERENCES Theater_Person(person_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE TABLE Theater_Venue (\n  venue_id    INTEGER PRIMARY KEY,\n  address_id    INTEGER,\n  phone_number  TEXT,\n  location_name TEXT NOT NULL,\n  FOREIGN KEY (address_id) REFERENCES Theater_Addresses(address_id)\n    ON UPDATE CASCADE ON DELETE SET NULL\n);\n\nCREATE TABLE Theater_Section (\n  section_id INTEGER PRIMARY KEY,\n  venue_id INTEGER NOT NULL,\n  name       TEXT NOT NULL,\n  row_count  INTEGER,\n  seat_count INTEGER,\n  UNIQUE (venue_id, name),\n  FOREIGN KEY (venue_id) REFERENCES Theater_Venue(venue_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_section_theater ON Theater_Section(venue_id);\n\nCREATE TABLE Theater_Seat (\n  seat_id     INTEGER PRIMARY KEY,\n  section_id  INTEGER NOT NULL,\n  row_label   TEXT NOT NULL,\n  seat_number INTEGER NOT NULL,\n  UNIQUE (section_id, row_label, seat_number),\n  FOREIGN KEY (section_id) REFERENCES Theater_Section(section_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_seat_section ON Theater_Seat(section_id);\n\nCREATE TABLE Theater_Production (\n  production_id   INTEGER PRIMARY KEY,\n  title           TEXT NOT NULL,\n  author          TEXT,\n  open_date       TEXT,\n  close_date      TEXT,\n  genre           TEXT,\n  runtime_minutes INTEGER\n);\n\nCREATE TABLE Theater_Performance (\n  performance_id INTEGER PRIMARY KEY,\n  production_id  INTEGER NOT NULL,\n  venue_id     INTEGER NOT NULL,\n  starts_at      TEXT NOT NULL,\n  status         TEXT NOT NULL,\n  FOREIGN KEY (production_id) REFERENCES Theater_Production(production_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  FOREIGN KEY (venue_id)   REFERENCES Theater_Venue(venue_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_performance_prod    ON Theater_Performance(production_id);\nCREATE INDEX ix_performance_theater ON Theater_Performance(venue_id);\nCREATE INDEX ix_performance_start   ON Theater_Performance(starts_at);\n\nCREATE TABLE Theater_Ticket (\n  ticket_id      INTEGER PRIMARY KEY,\n  performance_id INTEGER NOT NULL,\n  seat_id        INTEGER NOT NULL,\n  price_paid     REAL NOT NULL,\n  barcode        TEXT NOT NULL,\n  status         TEXT NOT NULL,\n  UNIQUE (performance_id, seat_id),\n  UNIQUE (barcode),\n  FOREIGN KEY (performance_id) REFERENCES Theater_Performance(performance_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  FOREIGN KEY (seat_id)        REFERENCES Theater_Seat(seat_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_ticket_performance ON Theater_Ticket(performance_id);\nCREATE INDEX ix_ticket_seat        ON Theater_Ticket(seat_id);\n\nCREATE TABLE Theater_Purchase (\n  purchase_id     INTEGER PRIMARY KEY,\n  buyer_person_id INTEGER NOT NULL,\n  purchased_at    TEXT NOT NULL,\n  total_price     REAL NOT NULL,\n  channel         TEXT,\n  FOREIGN KEY (buyer_person_id) REFERENCES Theater_Person(person_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_purchase_buyer ON Theater_Purchase(buyer_person_id);\nCREATE INDEX ix_purchase_date  ON Theater_Purchase(purchased_at);\n\nCREATE TABLE Theater_PurchaseItem (\n  purchase_item_id INTEGER PRIMARY KEY,\n  purchase_id      INTEGER NOT NULL,\n  ticket_id        INTEGER NOT NULL,\n  item_price       REAL NOT NULL,\n  UNIQUE (ticket_id),\n  FOREIGN KEY (purchase_id) REFERENCES Theater_Purchase(purchase_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  FOREIGN KEY (ticket_id)   REFERENCES Theater_Ticket(ticket_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_item_purchase ON Theater_PurchaseItem(purchase_id);\n\nCREATE TABLE Theater_CastAssignment (\n  cast_assignment_id INTEGER PRIMARY KEY,\n  performance_id     INTEGER NOT NULL,\n  employee_id        INTEGER NOT NULL,\n  role_name          TEXT NOT NULL,\n  assignment_type    TEXT NOT NULL,\n  FOREIGN KEY (performance_id) REFERENCES Theater_Performance(performance_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  FOREIGN KEY (employee_id)    REFERENCES Theater_Employee(employee_id)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n);\n\nCREATE INDEX ix_cast_perf_emp ON Theater_CastAssignment(performance_id, employee_id, assignment_type);\n\nExample: What are the busiest purchase channels?\nselect channel, count(*) as purchases from theater_purchase group by channel order by purchases desc;\nI am not feeling too well, but perhaps you can help by providing a sql query to answer my question.\nAnswer only for the our database, not for the theater database.",
+  "questionResults": [
+    {
+      "question": "What is the most ordered menu item?",
+      "sql": "\nSELECT \n    mi.Name AS MenuItemName, \n    SUM(oi.Quantity) AS TotalOrdered\nFROM \n    OrderItem oi\nJOIN \n    MenuItem mi ON oi.MenuItemId = mi.Id\nGROUP BY \n    mi.Name\nORDER BY \n    TotalOrdered DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "None"
+    },
+    {
+      "question": "Who doesn't have a way for us to text them?",
+      "sql": "To determine which people in your McDonald's database don't have a phone number or a way to be contacted via text, you can look into the `Person` table, as it's the table that typically would contain contact information. However, based on the schema provided, there is no column for phone numbers or email addresses in the `Person` table.\n\nIf you expect to find this information stored somewhere else or if it is typically considered part of a database schema, you might have missed including that information. Based on the existing schema, you are currently unable to directly query for people without contact information, as no such columns exist in your tables.\n\nIf your schema should include contact information, you may want to consider adding those details to your `Person` table or another relevant table in the database.",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "near \"To\": syntax error"
+    },
+    {
+      "question": "Will we have a problem texting any of the previous award winners?",
+      "sql": "Based on the McDonald's database schema you provided, there is no information related to the phone numbers, emails, or any form of contact information for customers or employees. The `Person` table does not include columns for contact details that may be relevant for texting. Without such data, it's not possible to determine if you can text any of the previous award winners.\n\nIf you need to answer questions related to contacting award winners via text, the database would need to be updated to include relevant contact details, such as a phone number or email address.\n\nFor now, based on the existing schema, there's no SQL query that can determine texting capabilities since the information isn't stored in the database.",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "near \"Based\": syntax error"
+    },
+    {
+      "question": "On which date did we earn the most revenue?",
+      "sql": "\nSELECT \n    Date, \n    SUM(Cost) AS TotalRevenue\nFROM \n    Orders\nGROUP BY \n    Date\nORDER BY \n    TotalRevenue DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('2023-10-07', 40)]",
+      "friendlyResponse": "You earned the most revenue on October 7, 2023.",
+      "error": "None"
+    },
+    {
+      "question": "Which franchise has the highest total revenue?",
+      "sql": "\nSELECT \n    f.Id AS FranchiseId,\n    SUM(o.Cost) AS TotalRevenue\nFROM \n    Orders o\nJOIN \n    Franchise f ON o.FranchiseId = f.Id\nGROUP BY \n    f.Id\nORDER BY \n    TotalRevenue DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[(1, 90.1)]",
+      "friendlyResponse": "The franchise with the highest total revenue is Pok\u00e9mon.",
+      "error": "None"
+    },
+    {
+      "question": "What is the average wait time for each franchise, from longest to shortest?",
+      "sql": "\nSELECT \n    FranchiseId,\n    AVG(WaitTime) AS AverageWaitTime\nFROM \n    Orders\nGROUP BY \n    FranchiseId\nORDER BY \n    AverageWaitTime DESC;\n",
+      "queryRawResponse": "[(1, 20.333333333333332), (4, 18.666666666666668), (3, 18.333333333333332), (6, 18.0), (5, 16.0), (2, 15.666666666666666)]",
+      "friendlyResponse": "1: 20.33 mins  \n4: 18.67 mins  \n3: 18.33 mins  \n6: 18.00 mins  \n5: 16.00 mins  \n2: 15.67 mins",
+      "error": "None"
+    },
+    {
+      "question": "how many employees work at the franchise with id = 1",
+      "sql": "\nSELECT COUNT(*) AS NumberOfEmployees\nFROM Employee\nWHERE FranchiseId = 1;\n",
+      "queryRawResponse": "[(3,)]",
+      "friendlyResponse": "There are 3 employees.",
+      "error": "None"
+    },
+    {
+      "question": "how many big macs does franchise 2 have in stock?",
+      "sql": "\nSELECT fs.Amount\nFROM FoodStock fs\nJOIN MenuItem mi ON fs.MenuItemId = mi.Id\nWHERE mi.Name = 'Big Mac' AND fs.FranchiseId = 2;\n",
+      "queryRawResponse": "[(110,)]",
+      "friendlyResponse": "Franchise 2 has 110 Big Macs in stock.",
+      "error": "None"
+    },
+    {
+      "question": "what menuItems were ordered in order 3?",
+      "sql": "\nSELECT mi.Name, oi.Quantity\nFROM OrderItem oi\nJOIN MenuItem mi ON oi.MenuItemId = mi.Id\nWHERE oi.OrderId = 3;\n",
+      "queryRawResponse": "[('McChicken', 2), ('French Fries (Small)', 1), ('Soft Drink (Small)', 1)]",
+      "friendlyResponse": "Order 3 included: 2 McChickens, 1 Small French Fries, and 1 Small Soft Drink.",
+      "error": "None"
+    }
+  ]
+}

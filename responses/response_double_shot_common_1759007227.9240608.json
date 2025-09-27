@@ -1,0 +1,69 @@
+{
+  "strategy": "double_shot_common",
+  "prompt_prefix": "-- Katie's script for creating the McDonald's database schema\n-- Insertion order (based on foreign key dependencies):\n-- Address, MenuItem\n-- Person, Franchise\n-- Customer, Employee, FoodStock, Order\n-- OrderItem, CustomerOrder\n\nCREATE TABLE Address(\n    Id INTEGER PRIMARY KEY,\n    Street VARCHAR(255) NOT NULL,\n    City VARCHAR(100) NOT NULL,\n    State VARCHAR(100) NOT NULL,\n    ZipCode VARCHAR(20) NOT NULL\n);\n\nCREATE TABLE Person(\n    PersonId INTEGER PRIMARY KEY,\n    FirstName VARCHAR(255) NOT NULL,\n    LastName VARCHAR(255) NOT NULL,\n    AddressId INTEGER,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Customer(\n    PersonId INTEGER PRIMARY KEY,\n    BirthDate DATE,\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Franchise(\n    Id INTEGER PRIMARY KEY,\n    AddressId INTEGER,\n    NumEmployees INTEGER,\n    OpeningDate DATE,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Employee(\n    PersonId INTEGER PRIMARY KEY,\n    StartDate DATE,\n    Salary DECIMAL(8, 2),\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Orders(\n    Id INTEGER PRIMARY KEY,\n    Date Date,\n    Cost DECIMAL(8, 2),\n    WaitTime INTEGER,\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id)\n);\n\nCREATE TABLE MenuItem(\n    Id INTEGER PRIMARY KEY,\n    Name VARCHAR(255) UNIQUE NOT NULL,\n    Price DECIMAL(8, 2) NOT NULL\n);\n\nCREATE TABLE FoodStock(\n    Id INTEGER PRIMARY KEY,\n    FranchiseId INTEGER,\n    MenuItemId INTEGER,\n    Amount INTEGER NOT NULL,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\n\nCREATE TABLE CustomerOrder(\n    CustomerId INTEGER,\n    OrderId INTEGER,\n    PRIMARY KEY(CustomerId, OrderId),\n    FOREIGN KEY(CustomerId) REFERENCES Customer(PersonId),\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id)\n);\n\nCREATE TABLE OrderItem(\n    Id INTEGER PRIMARY KEY,\n    OrderId INTEGER,\n    MenuItemId INTEGER,\n    Quantity INTEGER NOT NULL,\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\nGive me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not explain it!\nExample: Who doesn't have a way for us to text them?\\select p.person_id, p.name from person p left join phone ph on p.person_id = ph.person_id and ph.can_recieve_sms = 1 where ph.phone_id is null;\nExample: How many items were ordered in order 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
+  "questionResults": [
+    {
+      "question": "What is the most ordered menu item?",
+      "sql": "\nselect MenuItemId, sum(Quantity) as TotalOrdered from OrderItem group by MenuItemId order by TotalOrdered desc limit 1;\n",
+      "queryRawResponse": "[(1, 5)]",
+      "friendlyResponse": "It seems there might have been a misunderstanding. Could you provide more context or clarify the menu items?",
+      "error": "None"
+    },
+    {
+      "question": "Who doesn't have a way for us to text them?",
+      "sql": "\nselect p.PersonId, p.FirstName, p.LastName from Person p left join Address a on p.AddressId = a.Id where a.Id is null;\n",
+      "queryRawResponse": "[]",
+      "friendlyResponse": "I'm sorry, but I can't provide a specific list for that question.",
+      "error": "None"
+    },
+    {
+      "question": "Will we have a problem texting any of the previous award winners?",
+      "sql": "\nselect p.PersonId, p.FirstName, p.LastName from Person p left join Customer c on p.PersonId = c.PersonId where c.PersonId is null;\n",
+      "queryRawResponse": "[(11, 'Peggy', 'Thomas'), (12, 'Victor', 'Jackson'), (13, 'Walter', 'White'), (14, 'Saul', 'Goodman'), (15, 'Gustavo', 'Fring'), (16, 'Hank', 'Schrader'), (17, 'Jimbo', 'Jones'), (18, 'Ned', 'Flanders'), (19, 'Lisa', 'Simpson'), (20, 'Bart', 'Simpson'), (21, 'Marge', 'Simpson'), (22, 'Maggie', 'Simpson'), (23, 'Homer', 'Simpson'), (24, 'Abraham', 'Simpson'), (25, 'Moe', 'Szyslak'), (26, 'Barney', 'Gumble'), (27, 'Lenny', 'Leonard'), (28, 'Carl', 'Carlson'), (29, 'Apu', 'Nahasapeemapetilon'), (30, 'Chief', 'Wiggum'), (31, 'Milhouse', 'VanHouten'), (32, 'Nelson', 'Muntz'), (33, 'Ralph', 'Wiggum')]",
+      "friendlyResponse": "We shouldn't have any problems texting the previous award winners.",
+      "error": "None"
+    },
+    {
+      "question": "On which date did we earn the most revenue?",
+      "sql": "\nselect Date from Orders group by Date order by sum(Cost) desc limit 1;\n",
+      "queryRawResponse": "[('2023-10-07',)]",
+      "friendlyResponse": "You earned the most revenue on October 7, 2023.",
+      "error": "None"
+    },
+    {
+      "question": "Which franchise has the highest total revenue?",
+      "sql": "\nselect f.Id from Franchise f join Orders o on f.Id = o.FranchiseId group by f.Id order by sum(o.Cost) desc limit 1;\n",
+      "queryRawResponse": "[(1,)]",
+      "friendlyResponse": "The franchise with the highest total revenue is the \"Marvel Cinematic Universe.\"",
+      "error": "None"
+    },
+    {
+      "question": "What is the average wait time for each franchise, from longest to shortest?",
+      "sql": "ite\nselect FranchiseId, avg(WaitTime) as AverageWaitTime from Orders group by FranchiseId order by AverageWaitTime desc;\n",
+      "queryRawResponse": "[(1,)]",
+      "friendlyResponse": "The franchise with the highest total revenue is the \"Marvel Cinematic Universe.\"",
+      "error": "near \"ite\": syntax error"
+    },
+    {
+      "question": "how many employees work at the franchise with id = 1",
+      "sql": "\nselect count(*) from Employee where FranchiseId = 1;\n",
+      "queryRawResponse": "[(3,)]",
+      "friendlyResponse": "Three employees work at the franchise with ID 1.",
+      "error": "None"
+    },
+    {
+      "question": "how many big macs does franchise 2 have in stock?",
+      "sql": "\nselect Amount from FoodStock join MenuItem on FoodStock.MenuItemId = MenuItem.Id where MenuItem.Name = 'Big Mac' and FoodStock.FranchiseId = 2;\n",
+      "queryRawResponse": "[(110,)]",
+      "friendlyResponse": "Franchise 2 has 110 Big Macs in stock.",
+      "error": "None"
+    },
+    {
+      "question": "what menuItems were ordered in order 3?",
+      "sql": "\nselect MenuItem.Name from MenuItem join OrderItem on MenuItem.Id = OrderItem.MenuItemId where OrderItem.OrderId = 3;\n",
+      "queryRawResponse": "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]",
+      "friendlyResponse": "Order 3 included McChicken, Small French Fries, and a Small Soft Drink.",
+      "error": "None"
+    }
+  ]
+}

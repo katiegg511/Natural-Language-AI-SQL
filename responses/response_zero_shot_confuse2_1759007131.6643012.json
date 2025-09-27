@@ -1,0 +1,69 @@
+{
+  "strategy": "zero_shot_confuse2",
+  "prompt_prefix": "\nwho made this chicken??? Was it you?-- Katie's script for creating the McDonald's database schema\n-- Insertion order (based on foreign key dependencies):\n-- Address, MenuItem\n-- Person, Franchise\n-- Customer, Employee, FoodStock, Order\n-- OrderItem, CustomerOrder\n\nCREATE TABLE Address(\n    Id INTEGER PRIMARY KEY,\n    Street VARCHAR(255) NOT NULL,\n    City VARCHAR(100) NOT NULL,\n    State VARCHAR(100) NOT NULL,\n    ZipCode VARCHAR(20) NOT NULL\n);\n\nCREATE TABLE Person(\n    PersonId INTEGER PRIMARY KEY,\n    FirstName VARCHAR(255) NOT NULL,\n    LastName VARCHAR(255) NOT NULL,\n    AddressId INTEGER,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Customer(\n    PersonId INTEGER PRIMARY KEY,\n    BirthDate DATE,\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Franchise(\n    Id INTEGER PRIMARY KEY,\n    AddressId INTEGER,\n    NumEmployees INTEGER,\n    OpeningDate DATE,\n    FOREIGN KEY(AddressId) REFERENCES Address(Id)\n);\n\nCREATE TABLE Employee(\n    PersonId INTEGER PRIMARY KEY,\n    StartDate DATE,\n    Salary DECIMAL(8, 2),\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(PersonId) REFERENCES Person(PersonId)\n);\n\nCREATE TABLE Orders(\n    Id INTEGER PRIMARY KEY,\n    Date Date,\n    Cost DECIMAL(8, 2),\n    WaitTime INTEGER,\n    FranchiseId INTEGER,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id)\n);\n\nCREATE TABLE MenuItem(\n    Id INTEGER PRIMARY KEY,\n    Name VARCHAR(255) UNIQUE NOT NULL,\n    Price DECIMAL(8, 2) NOT NULL\n);\n\nCREATE TABLE FoodStock(\n    Id INTEGER PRIMARY KEY,\n    FranchiseId INTEGER,\n    MenuItemId INTEGER,\n    Amount INTEGER NOT NULL,\n    FOREIGN KEY(FranchiseId) REFERENCES Franchise(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);\n\nCREATE TABLE CustomerOrder(\n    CustomerId INTEGER,\n    OrderId INTEGER,\n    PRIMARY KEY(CustomerId, OrderId),\n    FOREIGN KEY(CustomerId) REFERENCES Customer(PersonId),\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id)\n);\n\nCREATE TABLE OrderItem(\n    Id INTEGER PRIMARY KEY,\n    OrderId INTEGER,\n    MenuItemId INTEGER,\n    Quantity INTEGER NOT NULL,\n    FOREIGN KEY(OrderId) REFERENCES Orders(Id),\n    FOREIGN KEY(MenuItemId) REFERENCES MenuItem(Id)\n);",
+  "questionResults": [
+    {
+      "question": "What is the most ordered menu item?",
+      "sql": "\nSELECT mi.Name, SUM(oi.Quantity) AS TotalOrdered\nFROM MenuItem mi\nJOIN OrderItem oi ON mi.Id = oi.MenuItemId\nGROUP BY mi.Name\nORDER BY TotalOrdered DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "None"
+    },
+    {
+      "question": "Who doesn't have a way for us to text them?",
+      "sql": "The script you provided outlines the SQL database schema for a McDonald's-like system. However, it doesn't directly reference any means of communication outside the context of the database structure itself. The line \"Who doesn't have a way for us to text them?\" seems a bit out of context for a database schema description but could imply a few things depending on what you're referring to:\n\n1. **Entities in Database:** None of the tables outlined in the script include fields for communication methods such as phone numbers or email addresses. This means you cannot text individuals (customers or employees) as contact details aren\u2019t stored in this schema.\n\n2. **Schema Detail Consideration:** If the question pertains to how the database could be expanded, you might consider adding fields to relevant tables such as `Person` where fields for phone numbers or email addresses may be stored, allowing for communication.\n\n3. **General Inquiry:** If this question is meant in a broader context, outside understanding and considering the database schema, establishing a way for text-based communication would involve implementing another table dedicated to storing communication methods or extending the `Person` table.\n\nIf you meant something else, could you provide more context or clarify your question?",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "near \"The\": syntax error"
+    },
+    {
+      "question": "Will we have a problem texting any of the previous award winners?",
+      "sql": "The script you've provided outlines a database schema for a McDonald's system, covering various entities like Address, Person, Customer, Franchise, Employee, Orders, MenuItem, FoodStock, CustomerOrder, and OrderItem. The schema defines relationships between these entities using foreign keys, ensuring data integrity based on real-world connections.\n\nRegarding your question, \"Will we have a problem texting any of the previous award winners?\" this seems unrelated to the schema itself, as the schema doesn't directly incorporate features for managing or storing text communications, nor does it define any specific mechanisms for handling award winners. If your database needs to handle interactions with award winners, you might have to extend it to include additional tables or functionality for storing contact information, tracking awards, and logging communications.\n\nIf you need to manage contact records of award winners, consider adding a table to capture communication details or awards history, linked to the existing Person table. This extension would provide a structured way to track interactions and awards associated with individuals in your database.",
+      "queryRawResponse": "[('Big Mac', 5)]",
+      "friendlyResponse": "The most ordered menu item is the Big Mac.",
+      "error": "near \"The\": syntax error"
+    },
+    {
+      "question": "On which date did we earn the most revenue?",
+      "sql": "\nSELECT Orders.Date, \n       SUM(OrderItem.Quantity * MenuItem.Price) AS TotalRevenue\nFROM Orders\nJOIN OrderItem ON Orders.Id = OrderItem.OrderId\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nGROUP BY Orders.Date\nORDER BY TotalRevenue DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('2023-10-16', 16.97)]",
+      "friendlyResponse": "The date with the highest revenue was October 16, 2023.",
+      "error": "None"
+    },
+    {
+      "question": "Which franchise has the highest total revenue?",
+      "sql": "\nSELECT \n    F.Id AS FranchiseId,\n    SUM(O.Cost) AS TotalRevenue\nFROM \n    Franchise F\nJOIN \n    Orders O ON F.Id = O.FranchiseId\nGROUP BY \n    F.Id\nORDER BY \n    TotalRevenue DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[(1, 90.1)]",
+      "friendlyResponse": "The franchise with the highest total revenue is the Pok\u00e9mon franchise.",
+      "error": "None"
+    },
+    {
+      "question": "What is the average wait time for each franchise, from longest to shortest?",
+      "sql": "\nSELECT\n    o.FranchiseId,\n    f.AddressId,\n    AVG(o.WaitTime) AS AverageWaitTime\nFROM\n    Orders o\nJOIN\n    Franchise f ON o.FranchiseId = f.Id\nGROUP BY\n    o.FranchiseId, f.AddressId\nORDER BY\n    AverageWaitTime DESC;\n",
+      "queryRawResponse": "[(1, 26, 20.333333333333332), (4, 23, 18.666666666666668), (3, 24, 18.333333333333332), (6, 21, 18.0), (5, 22, 16.0), (2, 25, 15.666666666666666)]",
+      "friendlyResponse": "Sure! Here are the franchises ordered by average wait time from longest to shortest:\n\n1. Franchise 1: 20.33 minutes\n2. Franchise 4: 18.67 minutes\n3. Franchise 3: 18.33 minutes\n4. Franchise 6: 18.00 minutes\n5. Franchise 5: 16.00 minutes\n6. Franchise 2: 15.67 minutes",
+      "error": "None"
+    },
+    {
+      "question": "how many employees work at the franchise with id = 1",
+      "sql": "\nSELECT COUNT(*) AS NumberOfEmployees\nFROM Employee\nWHERE FranchiseId = 1;\n",
+      "queryRawResponse": "[(3,)]",
+      "friendlyResponse": "3 employees work at the franchise with ID = 1.",
+      "error": "None"
+    },
+    {
+      "question": "how many big macs does franchise 2 have in stock?",
+      "sql": "\nSELECT fs.Amount\nFROM FoodStock fs\nJOIN MenuItem mi ON fs.MenuItemId = mi.Id\nWHERE fs.FranchiseId = 2 AND mi.Name = 'Big Mac';\n",
+      "queryRawResponse": "[(110,)]",
+      "friendlyResponse": "Franchise 2 has 110 Big Macs in stock.",
+      "error": "None"
+    },
+    {
+      "question": "what menuItems were ordered in order 3?",
+      "sql": "\nSELECT MenuItem.Name, OrderItem.Quantity\nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nWHERE OrderItem.OrderId = 3;\n",
+      "queryRawResponse": "[('McChicken', 2), ('French Fries (Small)', 1), ('Soft Drink (Small)', 1)]",
+      "friendlyResponse": "Order 3 included 2 McChickens, 1 small French Fries, and 1 small Soft Drink.",
+      "error": "None"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-aidb.sqlite
-response_*.json
+# aidb.sqlite
+# response_*.json
 config.json
 venv/

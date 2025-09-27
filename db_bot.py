@@ -134,11 +134,11 @@ strategies = {
                 cross_domain_examples[0] + 
                 sadRequest + 
                 cross_domain_clarification),
-    "cross_domain_one_shot_sad": ("Our Database: " + setupSqlScript + 
+    "cross_domain_one_shot_confuse": ("Our Database: " + setupSqlScript + 
                 "\nExample From Another Database:\n" + 
                 setupCrossDomainSqlScript + 
                 cross_domain_examples[0] + 
-                sadRequest + 
+                confuseItPrompt + 
                 cross_domain_clarification),
     
     # "cross_domain_double_shot_common": ("Our Database: " + setupSqlScript + 

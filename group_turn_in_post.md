@@ -8,31 +8,33 @@ Our database is designed to help McDonald's keep track of all the information re
 
 ### McDonald Schema
 
-<img src="../mcdonald_database/schema.png">
+<img src="./mcdonald_database/schema.png">
 
 ### Cross Domain Theater Schema
 
-<img src="../cross_domain_theater_database/theater_schema.png">
+<img src="./cross_domain_theater_database/theater_schema.png">
 
 <!-- Sample question, SQL query, response that worked (if you have one)  -->
 
 ## Query I thought it did well on
 
-zeroshot meeting
-"how many big macs does franchise 2 have in stock?"
-"SELECT Amount \nFROM FoodStock \nJOIN MenuItem ON FoodStock.MenuItemId = MenuItem.Id \nWHERE MenuItem.Name = 'Big Mac' AND FoodStock.FranchiseId = 2;\n"
-response: "[(110,)]"
+**Strategy**: Zeroshot Meeting
 
-**Question**:
+**Question**: "how many big macs does franchise 2 have in stock?"
 
-**GPT SQL Response**:
+<!-- OLD SQL GENERATED: "SELECT Amount \nFROM FoodStock \nJOIN MenuItem ON FoodStock.MenuItemId = MenuItem.Id \nWHERE MenuItem.Name = 'Big Mac' AND FoodStock.FranchiseId = 2;\n"  -->
 
-**Friendly Response**:
+**GPT SQL Response**: "\nSELECT Amount FROM FoodStock WHERE FranchiseId = 2 AND MenuItemId = (SELECT Id FROM MenuItem WHERE Name = 'Big Mac');\n"
+
+**SQL Result**: "[(110,)]"
+
+**Friendly Response**: Franchise 2 has 110 Big Macs in stock.
 
 <!-- Sample question, SQL query, response that did not work (if you have one)  -->
 
 ## Question that it tripped up on
 The SQL response was the correct way to answer the question, but then the friendly response invented a name for the franchise.
+
 
 **Question**: Which franchise has the highest total revenue?
 
@@ -45,6 +47,22 @@ ORDER BY TotalRevenue DESC
 LIMIT 1;  ```
 
 **Friendly Response**: The franchise with the highest total revenue is Pokémon.
+
+**Strategy**: Zeroshot Meeting
+
+**Question**: "what menuItems were ordered in order 3?"
+
+**GPT SQL Response**: "\nSELECT MenuItem.Name\nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nWHERE OrderItem.OrderId = 3;\n"
+
+**SQL Result**: "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
+
+**Friendly Response**: Order 3 included a McChicken, small French Fries, and a small Soft Drink.
+
+**Explanation**: This prompt didn't get a sufficient SQL statement from GPT and generated an incorrect result. The question "What menuItems were ordered in order 3" implies it wants the quantities with the menuItems ordered but doesn't state that explicitly. Ironically, the strategies that we employed to deliberately confuse the GPT engine, were able to correctly get quantity data too.
+
+**Correct SQL Result**: "[('McChicken', 2), ('French Fries (Small)', 1), ('Soft Drink (Small)', 1)]",
+
+**Correct Friendly Result**: Order 3 included 2 McChickens, 1 small French Fries, and 1 small Soft Drink.
 
 <!-- A file outlining at least 6 other examples.  -->
 
