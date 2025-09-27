@@ -5,7 +5,7 @@ Our database is designed to help McDonald's keep track of all the information re
 
 <!-- Picture of Schema  -->
 ### McDonald Schema
-<img src="../dog_show_content/schema.png">
+<img src="../mcdonald_database/schema.png">
 
 ### Cross Domain Theater Schema
 <img src="../cross_domain_theater_database/theater_schema.png">
