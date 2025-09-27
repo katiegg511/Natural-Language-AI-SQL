@@ -110,16 +110,39 @@ Query Raw Response:
 Friendly Response:
 Certainly! Here is the average wait time for each franchise from longest to shortest:
 
-1. Franchise 1: 20.33 minutes
-2. Franchise 4: 18.67 minutes
-3. Franchise 3: 18.33 minutes
-4. Franchise 6: 18.0 minutes
-5. Franchise 5: 16.0 minutes
-6. Franchise 2: 15.67 minutes
+    1. Franchise 1: 20.33 minutes
+    2. Franchise 4: 18.67 minutes
+    3. Franchise 3: 18.33 minutes
+    4. Franchise 6: 18.0 minutes
+    5. Franchise 5: 16.0 minutes
+    6. Franchise 2: 15.67 minutes
 
-5.
+5. double_shot
+What is the most ordered menu item?
+SQL Syntax Response:
 
-6.
+select MenuItemId from OrderItem group by MenuItemId order by sum(Quantity) desc limit 1;
+
+Query Raw Response:
+[(1,)]
+Friendly Response:
+I'm sorry, I don't have that specific information.
+
+6. double_shot
+Question:
+Which franchise has the highest total revenue?
+SQL Syntax Response:
+
+select Franchise.Id from Franchise 
+join Orders on Franchise.Id = Orders.FranchiseId 
+group by Franchise.Id 
+order by sum(Orders.Cost) desc 
+limit 1;
+
+Query Raw Response:
+[(1,)]
+Friendly Response:
+Disney.
 
 <!-- Describe somewhere which prompting strategies you tried and if you noticed a difference between them. (Note my post only does two of three - which is fine!).  -->
 
