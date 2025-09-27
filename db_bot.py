@@ -19,6 +19,9 @@ setupSqlDataPath = getPath("setupData.sql")
 setupSqlPath = getPath("data.sql")
 setupSqlDataPath = getPath("putIndata.sql")
 
+# cross_domain paths
+setupCrossDomainSqlPath = getPath("schema_theater.sql")
+setupCrossDomainSqlDataPath = getPath("seed_theater.sql")
 
 # Erase previous db
 if os.path.exists(sqliteDbPath):
@@ -28,14 +31,23 @@ sqliteCon = sqlite3.connect(sqliteDbPath) # create new db
 sqliteCursor = sqliteCon.cursor()
 with (
         open(setupSqlPath) as setupSqlFile,
-        open(setupSqlDataPath) as setupSqlDataFile
+        open(setupSqlDataPath) as setupSqlDataFile,
+        
+        open(setupCrossDomainSqlPath) as setupCrossDomainSqlFile,
+        open(setupCrossDomainSqlDataPath) as setupCrossDomainSqlDataFile
     ):
 
     setupSqlScript = setupSqlFile.read()
     setupSQlDataScript = setupSqlDataFile.read()
+    
+    setupCrossDomainSqlScript = setupCrossDomainSqlFile.read()
+    setupCrossDomainSQlDataScript = setupCrossDomainSqlDataFile.read()
 
 sqliteCursor.executescript(setupSqlScript) # setup tables and keys
 sqliteCursor.executescript(setupSQlDataScript) # setup tables and keys
+
+sqliteCursor.executescript(setupCrossDomainSqlScript) # setup CrossDomain tables and keys
+sqliteCursor.executescript(setupCrossDomainSQlDataScript) # setup CrossDomain tables and keys
 
 def runSql(query):
     result = sqliteCursor.execute(query).fetchall()
@@ -82,6 +94,12 @@ strategies = {
     "single_domain_double_shot": (setupSqlScript +
                    " Who doesn't have a way for us to text them? " +
                    " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
+                   commonSqlOnlyRequest),
+    "cross-domain_one_shot": (setupSqlScript +
+                   "\nExample From Another Database:\n" + 
+                   setupCrossDomainSqlScript +
+                   "What are the busiest purchase channels?" +
+                   "SELECT channel, COUNT(*) AS purchases\nFROM theater_purchase\nGROUP BY channel\nORDER BY purchases DESC;" +
                    commonSqlOnlyRequest)
 }
 
@@ -94,8 +112,11 @@ questions = [
     # "What are the names and cities of the dogs who have awards?",
     # "Who has more than one phone number?",
     "Who doesn't have a way for us to text them?",
-    "Will we have a problem texting any of the previous award winners?"
+    "Will we have a problem texting any of the previous award winners?",
     # "I need insert sql into my tables can you provide good unique data?"
+    "On which date did we earn the most revenue?",
+    "Which franchise has the highest total revenue?",
+    "What is the average wait time for each franchise, from longest to shortest?"
 ]
 
 
