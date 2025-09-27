@@ -95,12 +95,13 @@ strategies = {
                    " Who doesn't have a way for us to text them? " +
                    " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
                    commonSqlOnlyRequest),
-    "cross-domain_one_shot": (setupSqlScript +
+    "cross-domain_one_shot": ("Our Database: " + setupSqlScript +
                    "\nExample From Another Database:\n" + 
                    setupCrossDomainSqlScript +
                    "What are the busiest purchase channels?" +
                    "SELECT channel, COUNT(*) AS purchases\nFROM theater_purchase\nGROUP BY channel\nORDER BY purchases DESC;" +
-                   commonSqlOnlyRequest)
+                   commonSqlOnlyRequest +
+                   " Answer only for the our database, not for the theater database.")
 }
 
 questions = [
