@@ -12,8 +12,8 @@ def getPath(fname):
 
 # SQLITE
 sqliteDbPath = getPath("aidb.sqlite")
-# setupSqlPath = getPath("setup.sql")
-# setupSqlDataPath = getPath("setupData.sql")
+# setupSqlPath = getPath("dog_show_content/setup.sql")
+# setupSqlDataPath = getPath("dog_show_content/setupData.sql")
 
 # kt paths
 setupSqlPath = getPath("mcdonald_database/data.sql")
@@ -102,6 +102,14 @@ strategies = {
     #                " Who doesn't have a way for us to text them? " +
     #                " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
     #                commonSqlOnlyRequest),
+    "cross-domain_one_shot": ("Our Database: " + setupSqlScript +
+                   "\nExample From Another Database:\n" + 
+                   setupCrossDomainSqlScript +
+                   "What are the busiest purchase channels?" +
+                   "SELECT channel, COUNT(*) AS purchases\nFROM theater_purchase\nGROUP BY channel\nORDER BY purchases DESC;" +
+                   commonSqlOnlyRequest +
+                   " Answer only for the our database, not for the theater database."),
+
 
     # our groups strategies 
     # "zero_shot_meeting": setupSqlScript + importantMeetingRequest,
@@ -111,27 +119,6 @@ strategies = {
     "single_domain_confuse_zero_shot": setupSqlScript + confuseItPrompt,
     "single_domain_confuse2_zero_shot": confuseItPrompt + setupSqlScript
 }
-
-strategies = {
-    "zero_shot": setupSqlScript + commonSqlOnlyRequest,
-    "single_domain_double_shot": (setupSqlScript +
-                   " Who doesn't have a way for us to text them? " +
-                   " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
-                   commonSqlOnlyRequest),
-    "cross-domain_one_shot": ("Our Database: " + setupSqlScript +
-                   "\nExample From Another Database:\n" + 
-                   setupCrossDomainSqlScript +
-                   "What are the busiest purchase channels?" +
-                   "SELECT channel, COUNT(*) AS purchases\nFROM theater_purchase\nGROUP BY channel\nORDER BY purchases DESC;" +
-                   commonSqlOnlyRequest +
-                   " Answer only for the our database, not for the theater database.")
-}
-
-questions = [
-    "how many employees work at the franchise with id = 1",
-    "how many big macs does franchise 2 have in stock?",
-    "what menuItems were ordered in order 3?"
-]
 
 questions = [
     "What is the most ordered menu item?",
@@ -146,7 +133,10 @@ questions = [
     # "I need insert sql into my tables can you provide good unique data?"
     "On which date did we earn the most revenue?",
     "Which franchise has the highest total revenue?",
-    "What is the average wait time for each franchise, from longest to shortest?"
+    "What is the average wait time for each franchise, from longest to shortest?",
+    "how many employees work at the franchise with id = 1",
+    "how many big macs does franchise 2 have in stock?",
+    "what menuItems were ordered in order 3?"
 ]
 
 
