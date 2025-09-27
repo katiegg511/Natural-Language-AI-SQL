@@ -81,7 +81,7 @@ single_domain_examples = [
     "\nExample: How many items were ordered in order 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
     "\nExample: How many employees work at the franchise 1?\nselect count(*) from Employee where FranchiseID = 1;",
     "\nExample: How many big macs does franchise 2 have in stock?\nselect * from FoodStock join MenuItem on FoodStock.MenuItemId = Menuitem.Id join Franchise on FoodStock.FranchiseId = Franchise.Id where FoodStock.FranchiseId = 2 and MenuItem.Name = 'Big Mac';",
-    "\nExample: What menuItems were ordered in order 3?\nselect MenuItem.Name from OrderItem join MenuItem on OrderItem.MenuItemId = MenuItem.Id where OrderItem.OrderId = 3;"
+    "\nExample: What menuItems were ordered in order 3?\nselect MenuItem.Name from OrderItem join MenuItem on OrderItem.MenuItemId = MenuItem.Id where OrderItem.OrderId = 3;",
     "\nExample: Who doesn't have a way for us to text them?\select p.person_id, p.name from person p left join phone ph on p.person_id = ph.person_id and ph.can_recieve_sms = 1 where ph.phone_id is null;"
 ]
 
