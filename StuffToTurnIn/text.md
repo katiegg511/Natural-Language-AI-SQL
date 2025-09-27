@@ -17,27 +17,35 @@ Our database is designed to help McDonald's keep track of all the information re
 zeroshot meeting
 "how many big macs does franchise 2 have in stock?"
 "SELECT Amount \nFROM FoodStock \nJOIN MenuItem ON FoodStock.MenuItemId = MenuItem.Id \nWHERE MenuItem.Name = 'Big Mac' AND FoodStock.FranchiseId = 2;\n"
-response: "[(110,)]"
-
-1.
-one_shot 
-"how many employees work at the franchise with id = 1"
-"\nSELECT COUNT(*) FROM Employee WHERE FranchiseId = 1;\n"
-"[(3,)]"
-
-1. 
-zero_shot
-"what menuItems were ordered in order 3?"
-"\nSELECT MenuItem.Name \nFROM OrderItem \nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id \nWHERE OrderItem.OrderId = 3;\n"
-"[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
-
-1. 
+response: "[(110,)]" 
 
 <!-- Sample question, SQL query, response that did not work (if you have one)  -->
 ## Question that it tripped up on
 
 <!-- A file outlining at least 6 other examples.  -->
 ## File of Other Examples
+1.
+one_shot 
+"how many employees work at the franchise with id = 1"
+"\nSELECT COUNT(*) FROM Employee WHERE FranchiseId = 1;\n"
+"[(3,)]"
+
+2. 
+zero_shot
+"what menuItems were ordered in order 3?"
+"\nSELECT MenuItem.Name \nFROM OrderItem \nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id \nWHERE OrderItem.OrderId = 3;\n"
+"[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
+
+3.
+
+
+4.
+
+
+5.
+
+
+6.
 
 <!-- Describe somewhere which prompting strategies you tried and if you noticed a difference between them. (Note my post only does two of three - which is fine!).  -->
 ## Conclusion
