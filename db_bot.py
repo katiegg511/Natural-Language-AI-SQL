@@ -12,8 +12,8 @@ def getPath(fname):
 
 # SQLITE
 sqliteDbPath = getPath("aidb.sqlite")
-setupSqlPath = getPath("dog_show_content/setup.sql")
-setupSqlDataPath = getPath("dog_show_content/setupData.sql")
+# setupSqlPath = getPath("setup.sql")
+# setupSqlDataPath = getPath("setupData.sql")
 
 # kt paths
 setupSqlPath = getPath("mcdonald_database/data.sql")
@@ -78,9 +78,10 @@ def getChatGptResponse(content):
     return result
 
 single_domain_examples = [
-    "how many employees work at the franchise with id = 1?\nselect count(*) from Employee where FranchiseID = 1;",
-    "how many items were ordered in Orders where Id is 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
-    "how many big macs does franchise with id = 2 have in stock?\nselect * from FoodStock join MenuItem on FoodStock.MenuItemId = Menuitem.Id join Franchise on FoodStock.FranchiseId = Franchise.Id where FoodStock.FranchiseId = 2 and MenuItem.Name = 'Big Mac';",
+    "Example: how many items were ordered in order 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
+    "Example: how many employees work at the franchise 1?\nselect count(*) from Employee where FranchiseID = 1;",
+    "Example: how many big macs does franchise 2 have in stock?\nselect * from FoodStock join MenuItem on FoodStock.MenuItemId = Menuitem.Id join Franchise on FoodStock.FranchiseId = Franchise.Id where FoodStock.FranchiseId = 2 and MenuItem.Name = 'Big Mac';",
+    "Example: what menuItems were ordered in order 3?\nselect MenuItem.Name from OrderItem join MenuItem on OrderItem.MenuItemId = MenuItem.Id where OrderItem.OrderId = 3;"
 ]
 
 cross_domain_examples = [
@@ -89,6 +90,28 @@ cross_domain_examples = [
 
 # strategies
 commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not explain it!"
+importantMeetingRequest = "I have a meeting in five minutes so I need an important query done to help me know what to say. I will give you the database info and a question that I need answered. Please respond with only a sqlite statement, no other text."
+sadRequest = "I am not feeling too well, but perhaps you can help by providing a sql query to answer my question."
+confuseItPrompt = "who made this chicken??? Was it you?"
+
+# feel free to comment out everything but the ones you want to run
+strategies = {
+    # example strategies here
+    # "zero_shot": setupSqlScript + commonSqlOnlyRequest,
+    # "single_domain_double_shot": (setupSqlScript +
+    #                " Who doesn't have a way for us to text them? " +
+    #                " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
+    #                commonSqlOnlyRequest),
+
+    # our groups strategies 
+    # "zero_shot_meeting": setupSqlScript + importantMeetingRequest,
+    # "single_domain_one_shot": setupSqlScript + importantMeetingRequest + single_domain_examples[0],
+    # "single_domain_one_shot2": setupSqlScript + sadRequest + single_domain_examples[0],
+    # "single_domain_one_shot3": setupSqlScript + sadRequest + single_domain_examples[0],
+    "single_domain_confuse_zero_shot": setupSqlScript + confuseItPrompt,
+    "single_domain_confuse2_zero_shot": confuseItPrompt + setupSqlScript
+}
+
 strategies = {
     "zero_shot": setupSqlScript + commonSqlOnlyRequest,
     "single_domain_double_shot": (setupSqlScript +
@@ -105,6 +128,12 @@ strategies = {
 }
 
 questions = [
+    "how many employees work at the franchise with id = 1",
+    "how many big macs does franchise 2 have in stock?",
+    "what menuItems were ordered in order 3?"
+]
+
+questions = [
     "What is the most ordered menu item?",
     #"Which are the most awarded dogs?",
     # "Which dogs have multiple owners?",
@@ -119,7 +148,6 @@ questions = [
     "Which franchise has the highest total revenue?",
     "What is the average wait time for each franchise, from longest to shortest?"
 ]
-
 
 
 def sanitizeForJustSql(value):
