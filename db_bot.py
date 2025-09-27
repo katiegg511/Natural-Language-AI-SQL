@@ -78,59 +78,107 @@ def getChatGptResponse(content):
     return result
 
 single_domain_examples = [
-    "Example: how many items were ordered in order 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
-    "Example: how many employees work at the franchise 1?\nselect count(*) from Employee where FranchiseID = 1;",
-    "Example: how many big macs does franchise 2 have in stock?\nselect * from FoodStock join MenuItem on FoodStock.MenuItemId = Menuitem.Id join Franchise on FoodStock.FranchiseId = Franchise.Id where FoodStock.FranchiseId = 2 and MenuItem.Name = 'Big Mac';",
-    "Example: what menuItems were ordered in order 3?\nselect MenuItem.Name from OrderItem join MenuItem on OrderItem.MenuItemId = MenuItem.Id where OrderItem.OrderId = 3;"
+    "\nExample: How many items were ordered in order 3\nselect count(*) from Orders join OrderItem on Orders.Id = OrderItem.OrderId where OrderItem.Id = 3;",
+    "\nExample: How many employees work at the franchise 1?\nselect count(*) from Employee where FranchiseID = 1;",
+    "\nExample: How many big macs does franchise 2 have in stock?\nselect * from FoodStock join MenuItem on FoodStock.MenuItemId = Menuitem.Id join Franchise on FoodStock.FranchiseId = Franchise.Id where FoodStock.FranchiseId = 2 and MenuItem.Name = 'Big Mac';",
+    "\nExample: What menuItems were ordered in order 3?\nselect MenuItem.Name from OrderItem join MenuItem on OrderItem.MenuItemId = MenuItem.Id where OrderItem.OrderId = 3;"
+    "\nExample: Who doesn't have a way for us to text them?\select p.person_id, p.name from person p left join phone ph on p.person_id = ph.person_id and ph.can_recieve_sms = 1 where ph.phone_id is null;"
 ]
 
 cross_domain_examples = [
-    "who doesn't have a way for us to text them?\nselect p.person_id, p.name\nfrom person p\nleft join phone ph on p.person_id = ph.person_id and ph.can_recieve_sms = 1\nwhere ph.phone_id is null;\n"
+    "\nExample: What are the busiest purchase channels?\nselect channel, count(*) as purchases from theater_purchase group by channel order by purchases desc;"
 ]
 
-# strategies
-commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not explain it!"
-importantMeetingRequest = "I have a meeting in five minutes so I need an important query done to help me know what to say. I will give you the database info and a question that I need answered. Please respond with only a sqlite statement, no other text."
-sadRequest = "I am not feeling too well, but perhaps you can help by providing a sql query to answer my question."
-confuseItPrompt = "who made this chicken??? Was it you?"
+# requests
+commonSqlOnlyRequest = "\nGive me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not explain it!"
+importantMeetingRequest = "\nI have a meeting in five minutes so I need an important query done to help me know what to say. I will give you the database info and a question that I need answered. Please respond with only a sqlite statement, no other text."
+sadRequest = "\nI am not feeling too well, but perhaps you can help by providing a sql query to answer my question."
+confuseItPrompt = "\nwho made this chicken??? Was it you?"
+
+cross_domain_clarification = "\nAnswer only for the our database, not for the theater database."
 
 # feel free to comment out everything but the ones you want to run
 strategies = {
-    # example strategies here
-    # "zero_shot": setupSqlScript + commonSqlOnlyRequest,
-    # "single_domain_double_shot": (setupSqlScript +
-    #                " Who doesn't have a way for us to text them? " +
-    #                " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
-    #                commonSqlOnlyRequest),
-    "cross-domain_one_shot": ("Our Database: " + setupSqlScript +
-                   "\nExample From Another Database:\n" + 
-                   setupCrossDomainSqlScript +
-                   "What are the busiest purchase channels?" +
-                   "SELECT channel, COUNT(*) AS purchases\nFROM theater_purchase\nGROUP BY channel\nORDER BY purchases DESC;" +
-                   commonSqlOnlyRequest +
-                   " Answer only for the our database, not for the theater database."),
+    # single domain strategies
+    "zero_shot_common_request": setupSqlScript + commonSqlOnlyRequest,
+    "zero_shot_meeting": setupSqlScript + importantMeetingRequest,
+    "zero_shot_confuse": setupSqlScript + confuseItPrompt,
+    "zero_shot_confuse2": confuseItPrompt + setupSqlScript,
+    
+    "one_shot_common": setupSqlScript + commonSqlOnlyRequest + single_domain_examples[0],
+    "one_shot_meeting": setupSqlScript + importantMeetingRequest + single_domain_examples[0],
+    "one_shot_sad": setupSqlScript + sadRequest + single_domain_examples[0],
+    "one_shot_confuse": setupSqlScript + confuseItPrompt + single_domain_examples[0],
+    
+    "double_shot_common": setupSqlScript + commonSqlOnlyRequest + single_domain_examples[5] + single_domain_examples[0],
+    "double_shot_meeting": setupSqlScript + importantMeetingRequest + single_domain_examples[5] + single_domain_examples[0],
+    "double_shot_sad": setupSqlScript + sadRequest + single_domain_examples[5] + single_domain_examples[0],
+    "double_shot_confuse": setupSqlScript + confuseItPrompt + single_domain_examples[5] + single_domain_examples[0],
 
-
-    # our groups strategies 
-    # "zero_shot_meeting": setupSqlScript + importantMeetingRequest,
-    # "single_domain_one_shot": setupSqlScript + importantMeetingRequest + single_domain_examples[0],
-    # "single_domain_one_shot2": setupSqlScript + sadRequest + single_domain_examples[0],
-    # "single_domain_one_shot3": setupSqlScript + sadRequest + single_domain_examples[0],
-    "single_domain_confuse_zero_shot": setupSqlScript + confuseItPrompt,
-    "single_domain_confuse2_zero_shot": confuseItPrompt + setupSqlScript
+    # cross domain strategies
+    "cross_domain_one_shot_common": ("Our Database: " + setupSqlScript + 
+                "\nExample From Another Database:\n" + 
+                setupCrossDomainSqlScript + 
+                cross_domain_examples[0] + 
+                commonSqlOnlyRequest + 
+                cross_domain_clarification),
+    "cross_domain_one_shot_meeting": ("Our Database: " + setupSqlScript + 
+                "\nExample From Another Database:\n" + 
+                setupCrossDomainSqlScript + 
+                cross_domain_examples[0] + 
+                importantMeetingRequest + 
+                cross_domain_clarification),
+    "cross_domain_one_shot_sad": ("Our Database: " + setupSqlScript + 
+                "\nExample From Another Database:\n" + 
+                setupCrossDomainSqlScript + 
+                cross_domain_examples[0] + 
+                sadRequest + 
+                cross_domain_clarification),
+    "cross_domain_one_shot_sad": ("Our Database: " + setupSqlScript + 
+                "\nExample From Another Database:\n" + 
+                setupCrossDomainSqlScript + 
+                cross_domain_examples[0] + 
+                sadRequest + 
+                cross_domain_clarification),
+    
+    # "cross_domain_double_shot_common": ("Our Database: " + setupSqlScript + 
+    #             "\nExample From Another Database:\n" + 
+    #             setupCrossDomainSqlScript + 
+    #             cross_domain_examples[0] + 
+    #             commonSqlOnlyRequest + 
+    #             cross_domain_clarification),
+    # "cross_domain_double_shot_meeting": ("Our Database: " + setupSqlScript + 
+    #             "\nExample From Another Database:\n" + 
+    #             setupCrossDomainSqlScript + 
+    #             cross_domain_examples[0] + 
+    #             importantMeetingRequest + 
+    #             cross_domain_clarification),
+    # "cross_domain_double_shot_sad": ("Our Database: " + setupSqlScript + 
+    #             "\nExample From Another Database:\n" + 
+    #             setupCrossDomainSqlScript + 
+    #             cross_domain_examples[0] + 
+    #             sadRequest + 
+    #             cross_domain_clarification),
+    # "cross_domain_double_shot_sad": ("Our Database: " + setupSqlScript + 
+    #             "\nExample From Another Database:\n" + 
+    #             setupCrossDomainSqlScript + 
+    #             cross_domain_examples[0] + 
+    #             sadRequest + 
+    #             cross_domain_clarification),
 }
 
+
+#"Which are the most awarded dogs?",
+# "Which dogs have multiple owners?",
+# "Which people have multiple dogs?",
+# "What are the top 3 cities represented?",
+# "What are the names and cities of the dogs who have awards?",
+# "Who has more than one phone number?",
+# "I need insert sql into my tables can you provide good unique data?"
 questions = [
     "What is the most ordered menu item?",
-    #"Which are the most awarded dogs?",
-    # "Which dogs have multiple owners?",
-    # "Which people have multiple dogs?",
-    # "What are the top 3 cities represented?",
-    # "What are the names and cities of the dogs who have awards?",
-    # "Who has more than one phone number?",
     "Who doesn't have a way for us to text them?",
     "Will we have a problem texting any of the previous award winners?",
-    # "I need insert sql into my tables can you provide good unique data?"
     "On which date did we earn the most revenue?",
     "Which franchise has the highest total revenue?",
     "What is the average wait time for each franchise, from longest to shortest?",
@@ -186,10 +234,10 @@ for strategy in strategies:
             "friendlyResponse": friendlyResponse,
             "error": error
         })
-
+         
     responses["questionResults"] = questionResults
 
-    with open(getPath(f"response_{strategy}_{time()}.json"), "w") as outFile:
+    with open(getPath(f"responses/response_{strategy}_{time()}.json"), "w") as outFile:
         json.dump(responses, outFile, indent = 2)
 
 
