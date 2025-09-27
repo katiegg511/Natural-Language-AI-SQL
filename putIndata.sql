@@ -1,4 +1,3 @@
--- Katie's sample data for McDonald's database
 INSERT INTO Address (Id, Street, City, State, ZipCode) VALUES
 (1, '123 Main St', 'Springfield', 'IL', '62701'),
 (2, '456 Elm St', 'Shelbyville', 'IL', '62565'),
@@ -237,7 +236,7 @@ INSERT INTO FoodStock (Id, FranchiseId, MenuItemId, Amount) VALUES
 (90, 6, 15, 530);
 
 INSERT INTO Franchise (Id, AddressId, NumEmployees, OpeningDate) VALUES
-(1, 26, 25, '2010-05-15'),
+(1, 26, 3, '2010-05-15'),
 (2, 25, 30, '2012-08-22'),
 (3, 24, 20, '2015-11-10'),
 (4, 23, 15, '2018-03-05'),
