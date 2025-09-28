@@ -22,9 +22,7 @@ Our database is designed to help McDonald's keep track of all the information re
 
 **Question**: "how many big macs does franchise 2 have in stock?"
 
-<!-- OLD SQL GENERATED: "SELECT Amount \nFROM FoodStock \nJOIN MenuItem ON FoodStock.MenuItemId = MenuItem.Id \nWHERE MenuItem.Name = 'Big Mac' AND FoodStock.FranchiseId = 2;\n"  -->
-
-**GPT SQL Response**: "\nSELECT Amount FROM FoodStock WHERE FranchiseId = 2 AND MenuItemId = (SELECT Id FROM MenuItem WHERE Name = 'Big Mac');\n"
+**GPT SQL Response**: ```\nSELECT Amount FROM FoodStock WHERE FranchiseId = 2 AND MenuItemId = (SELECT Id FROM MenuItem WHERE Name = 'Big Mac');\n```
 
 **SQL Result**: "[(110,)]"
 
@@ -62,9 +60,9 @@ LIMIT 1;  ```
 
 **Strategy**: Zeroshot Meeting
 
-**Question**: "what menuItems were ordered in order 3?"
+**Question**: what menuItems were ordered in order 3?
 
-**GPT SQL Response**: "\nSELECT MenuItem.Name\nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nWHERE OrderItem.OrderId = 3;\n"
+**GPT SQL Response**: ``` \nSELECT MenuItem.Name\nFROM OrderItem\nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id\nWHERE OrderItem.OrderId = 3;\n ```
 
 **SQL Result**: "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
 
@@ -80,87 +78,72 @@ LIMIT 1;  ```
 
 ## File of Other Examples
 
-1.  one_shot
-    "how many employees work at the franchise with id = 1"
-    "\nSELECT COUNT(\*) FROM Employee WHERE FranchiseId = 1;\n"
-    "[(3,)]"
+1.  **Strategy**: Zeroshot Confuse
+   
+    **Question**: "how many employees work at the franchise with id = 1"
+      
+    **GPT SQL Response**: ```\nSELECT COUNT(*) AS NumberOfEmployees\nFROM Employee\nWHERE FranchiseId = 1;\n```
+    
+    **SQL Result**: "[(3,)]"
 
-2.  zero_shot
-    "what menuItems were ordered in order 3?"
-    "\nSELECT MenuItem.Name \nFROM OrderItem \nJOIN MenuItem ON OrderItem.MenuItemId = MenuItem.Id \nWHERE OrderItem.OrderId = 3;\n"
-    "[('McChicken',), ('French Fries (Small)',), ('Soft Drink (Small)',)]"
+    **Friendly Response**: 3 employees work at the franchise with ID = 1.
 
-3. zero_shot
-Question:
-What is the most ordered menu item?
+2.  **Strategy**: Oneshot Meeting
+   
+    **Question**: What is the average wait time for each franchise, from longest to shortest?
 
-SQL Syntax Response:
-SELECT MenuItem.Name
-FROM MenuItem
-JOIN OrderItem ON MenuItem.Id = OrderItem.MenuItemId
-GROUP BY MenuItem.Id
-ORDER BY SUM(OrderItem.Quantity) DESC
-LIMIT 1;
+    **GPT SQL Response**: ```\nSELECT FranchiseId, AVG(WaitTime) as AverageWaitTime FROM Orders GROUP BY FranchiseId ORDER BY AverageWaitTime DESC;\n```
+    
+    **SQL Result**: "[(1, 20.333333333333332), (4, 18.666666666666668), (3, 18.333333333333332), (6, 18.0), (5, 16.0), (2, 15.666666666666666)]"
 
-Query Raw Response:
-[('Big Mac',)]
-Friendly Response:
-The most ordered menu item is the Big Mac.
+    **Friendly Response**: "1: 20.33, 4: 18.67, 3: 18.33, 6: 18.0, 5: 16.0, 2: 15.67"
 
-4. zero_shot
-Question:
-What is the average wait time for each franchise, from longest to shortest?
-SQL Syntax Response:
+3.  **Strategy**: Doubleshot Meeting
+   
+    **Question**: Who doesn't have a way for us to text them?
 
-SELECT FranchiseId, AVG(WaitTime) AS AverageWaitTime
-FROM Orders
-GROUP BY FranchiseId
-ORDER BY AverageWaitTime DESC;
+    **GPT SQL Response**: ```\nselect p.personid, firstname || ' ' || lastname as name from person p left join address a on p.addressid = a.id where a.id is null;\n```
+    
+    **SQL Result**: "[]"
 
-Query Raw Response:
-[(1, 20.333333333333332), (4, 18.666666666666668), (3, 18.333333333333332), (6, 18.0), (5, 16.0), (2, 15.666666666666666)]
-Friendly Response:
-Certainly! Here is the average wait time for each franchise from longest to shortest:
+    **Friendly Response**: I'm sorry, but I can't provide a specific list of individuals or entities who don't have a way for you to text them. This information can vary widely depending on personal and organizational privacy preferences.
 
-    1. Franchise 1: 20.33 minutes
-    2. Franchise 4: 18.67 minutes
-    3. Franchise 3: 18.33 minutes
-    4. Franchise 6: 18.0 minutes
-    5. Franchise 5: 16.0 minutes
-    6. Franchise 2: 15.67 minutes
+4.  **Strategy**: Doubleshot Common
+   
+    **Question**: On which date did we earn the most revenue?
 
-5. double_shot
-What is the most ordered menu item?
-SQL Syntax Response:
+    **GPT SQL Response**: ```\nselect Date from Orders group by Date order by sum(Cost) desc limit 1;\n```
+    
+    **SQL Result**: "[('2023-10-07',)]"
 
-select MenuItemId from OrderItem group by MenuItemId order by sum(Quantity) desc limit 1;
+    **Friendly Response**: You earned the most revenue on October 7, 2023.
 
-Query Raw Response:
-[(1,)]
-Friendly Response:
-I'm sorry, I don't have that specific information.
+5.  **Strategy**: Cross Domain Oneshot Confuse
+   
+    **Question**: Will we have a problem texting any of the previous award winners?
 
-6. double_shot
-Question:
-Which franchise has the highest total revenue?
-SQL Syntax Response:
+    **GPT SQL Response**: ```Based on the provided database schema for the McDonald's database, it does not include any specific tables or fields related to awards or award winners. The schema focuses on addresses, persons, customers, franchises, employees, orders, menu items, food stocks, customer orders, and order items. There is no indication of any award-related data, such as award names, award dates, winners, or contact information for winners.\n\nConsequently, with the current structure of the McDonald's database, there is no direct way to track award winners or their contact information (like phone numbers or email addresses) for texting purposes.\n\nIf the aim is to track award winners or establish communication with them, additional tables or fields would need to be incorporated into the existing schema to record and organize such information. For instance, a new \"Awards\" table and an \"AwardWinners\" association table linked to the \"Person\" table might be necessary, alongside fields to capture relevant contact information.\n\nIn summary, given the current database schema, texting any previous award winners would be problematic, as no relevant data is available within the defined structure.```
+    
+    **Error**: "near \"Based\": syntax error"
 
-select Franchise.Id from Franchise 
-join Orders on Franchise.Id = Orders.FranchiseId 
-group by Franchise.Id 
-order by sum(Orders.Cost) desc 
-limit 1;
+6.  **Strategy**: Cross Domain Oneshot Sad
+   
+    **Question**: What is the most ordered menu item?
 
-Query Raw Response:
-[(1,)]
-Friendly Response:
-Disney.
+    **GPT SQL Response**: ```\nSELECT \n    mi.Name AS MenuItemName, \n    SUM(oi.Quantity) AS TotalOrdered\nFROM \n    OrderItem oi\nJOIN \n    MenuItem mi ON oi.MenuItemId = mi.Id\nGROUP BY \n    mi.Name\nORDER BY \n    TotalOrdered DESC\nLIMIT 1;\n```
+    
+    **SQL Result**: "[('Big Mac', 5)]"
+
+    **Friendly Response**: The most ordered menu item is the Big Mac.
 
 <!-- Describe somewhere which prompting strategies you tried and if you noticed a difference between them. (Note my post only does two of three - which is fine!).  -->
 
 ## Conclusion
 
-We tried a meeting strategy, meaning we told chat there was an urgent meeting, in order to see if the urgency did anything. We then did that with zero_shot and one_shot. Chat was able to get all of them correct, with no discernable differences.
-While the answers were correct, there were queries that got to the same answer but different ways. For example, to get the number of employees one used the NumEmployee column and another used the EmployeeId foreign key.
+We experimented with several different prompting strategies, combining a few different styles of prompts and example queries drawn from both our McDonald’s database and a reference theater database. Our prompt set included: a meeting notice style prompt, a straightforward request for concise and accurate information, a request framed around being sick, and a deliberately confusing prompt that asked “who made this chicken?” We also tried example queries ranging from simple single-table lookups in the McDonald’s database to more complex multi-table joins, plus one example drawn from the cross-domain theater database.
 
-We also made a strategy to try and confuse it by having it be completely unrelated to SQL: "who made this chicken??? Was it you?" as a pre-prompt with zero_shot, and it still got everything right.
+Overall, the strategies produced interesting results. The meeting-style prompt was usually accurate, though it sometimes missed the main idea. The “sad” and “confused” prompts didn’t derail performance much at all—in fact, there were a few cases where the confusing prompt actually led to better results than the standard prompts. The different strategies often produced different SQL queries, but most still arrived at the correct answer. Adding one or two database-specific examples made little difference in performance compared to providing none at all, which we suspect is due to the limited scope of our testing.
+
+Even when the answers were correct, the queries often took different paths to get there. For instance, one approach calculated the number of employees using the NumEmployee column, while another used the EmployeeId foreign key. Perhaps most surprising, even when we pre-prompted with something completely unrelated to SQL, “who made this chicken??? Was it you?”, the model still generated correct results under zero-shot conditions.
+
+Overall, these experiments highlighted both the resilience and unpredictability of the model, showing that it can reach correct answers through a variety of prompts even under unconventional conditions. When the model was really wrong, it was clear to the prompter. There was only one or two instance of subtly flawed responses.
